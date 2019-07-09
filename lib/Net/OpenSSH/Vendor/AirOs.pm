@@ -5,10 +5,23 @@ use namespace::autoclean;
 
 use Net::OpenSSH;
 use JSON::MaybeXS;
-
-#extends 'Net::OpenSSH';
+use Set::Array;
 
 # ABSTRACT: Connect via SSH to Ubiquiti AirOs system like its radios
+
+=head1 SYNOPSIS
+
+  use  Net::OpenSSH::Vendor::AirOs;
+
+  my $ssh = new Net::OpenSSH::Vendor::AirOs($ip, $username, $password, %opts)
+  $ssh->error and
+           die "Couldn't establish SSH connection: ". $ssh->error;
+
+=head1 DESCRIPTION
+
+An SSH client for Ubiquiti AirOs command line interface(CLI)
+
+=cut
 
 has ip          => (is => 'rw', required => 1, isa => 'Str');
 has username    => (is => 'rw', required => 1, isa => 'Str');
@@ -42,6 +55,10 @@ around BUILDARGS => sub {
     return $s->$orig_call($ret);
 };
 
+=method kill_cmd
+
+=cut
+
 sub kill_cmd {
     my $s   = shift;
     my $cmd = shift;
@@ -61,11 +78,19 @@ sub kill_cmd {
     return !$pid_to_kill->is_empty;
 }
 
+=method wstalist
+
+=cut
+
 sub wstalist {
     my $s = shift;
     my ( $out, $err ) = $s->capture2('wstalist');
     return decode_json $out;
 }
+
+=method status
+
+=cut
 
 sub status {
     my $s = shift;
@@ -92,3 +117,10 @@ sub status {
 __PACKAGE__->meta->make_immutable;
 
 1;
+
+
+=head1 SEE ALSO
+
+L<Net::OpenSSH>
+
+=cut
